@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+backend/venv/
+.pytest_cache/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Local database (auto-created at runtime)
+data/synthetic/*.db
+data/synthetic/*.db-wal
+data/synthetic/*.db-shm
+
+# Env
+.env

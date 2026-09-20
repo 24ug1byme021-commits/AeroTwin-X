@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: aerotwinx-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: CORS_ORIGINS
+        value: "*"
+
+  - type: web
+    name: aerotwinx-frontend
+    env: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npx serve dist -l $PORT
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: "https://aerotwinx-backend.onrender.com"

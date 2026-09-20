@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+@theme {
+  /* Aerospace HUD palette — deep space navy with instrument cyan */
+  --color-bg: #060b16;
+  --color-bg-2: #0a1120;
+  --color-panel: #0d1526;
+  --color-panel-2: #111b30;
+  --color-panel-border: #1e2d47;
+  --color-text: #eaf1fb;
+  --color-text-muted: #8497b7;
+  --color-accent: #34d3ff;
+  --color-accent-2: #6a8bff;
+  --color-normal: #2fe08a;
+  --color-warning: #f5c145;
+  --color-critical: #ff5064;
+}
+
+html, body, #root {
+  height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+body {
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* Layered aerospace backdrop: radial instrument glow + faint HUD grid */
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(1100px 600px at 78% -8%, rgba(52, 211, 255, 0.10), transparent 60%),
+    radial-gradient(900px 520px at 8% 108%, rgba(106, 139, 255, 0.10), transparent 55%),
+    linear-gradient(180deg, #060b16 0%, #070d1b 100%);
+  background-attachment: fixed;
+}
+
+/* Faint HUD grid overlay driven onto the whole page */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(52, 211, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(52, 211, 255, 0.035) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 30%, #000 40%, transparent 100%);
+}
+
+#root { position: relative; z-index: 1; }
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-panel-border);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover { background-color: #2c4066; }
+
+/* ============ Reusable HUD utility classes ============ */
+
+/* Glassy instrument panel */
+.atx-glass {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 45%),
+    var(--color-panel);
+  border: 1px solid var(--color-panel-border);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(6px);
+}
+
+.atx-glass-hover:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-panel-border));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 18%, transparent),
+    0 22px 48px -26px rgba(0, 0, 0, 0.95);
+}
+
+/* Section heading accent bar */
+.atx-heading-bar {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--color-accent), var(--color-accent-2));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+
+/* Status-tinted glow ring for the whole engine status card */
+.atx-glow-normal   { box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-normal) 35%, transparent), 0 0 34px -6px color-mix(in srgb, var(--color-normal) 45%, transparent); }
+.atx-glow-warning  { box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-warning) 40%, transparent), 0 0 34px -6px color-mix(in srgb, var(--color-warning) 50%, transparent); }
+.atx-glow-critical { box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-critical) 45%, transparent), 0 0 40px -4px color-mix(in srgb, var(--color-critical) 60%, transparent); animation: atx-critical-pulse 1.6s ease-in-out infinite; }
+
+@keyframes atx-critical-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-critical) 45%, transparent), 0 0 40px -6px color-mix(in srgb, var(--color-critical) 45%, transparent); }
+  50%      { box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-critical) 65%, transparent), 0 0 54px 0px color-mix(in srgb, var(--color-critical) 70%, transparent); }
+}
+
+/* Live pulsing dot */
+.atx-live-dot { position: relative; }
+.atx-live-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.35;
+  animation: atx-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes atx-ping {
+  0%   { transform: scale(0.7); opacity: 0.5; }
+  75%, 100% { transform: scale(2.1); opacity: 0; }
+}
+
+/* Flowing dot along the pipeline connectors */
+@keyframes atx-flow {
+  0%   { offset-distance: 0%;   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* Aircraft gentle float */
+@keyframes atx-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-7px) rotate(-0.6deg); }
+}
+
+/* Rotating engine crank / prop */
+@keyframes atx-spin { to { transform: rotate(360deg); } }
+/* transform-box: fill-box makes transform-origin resolve to the element's
+   OWN bounding-box centre — without it, an SVG <g> rotates about the SVG
+   viewport origin and appears to orbit rather than spin in place. */
+.atx-spin-slow { animation: atx-spin 3.2s linear infinite; transform-origin: center; transform-box: fill-box; }
+.atx-spin-med  { animation: atx-spin 1.5s linear infinite; transform-origin: center; transform-box: fill-box; }
+
+/* Sensor node soft pulse */
+@keyframes atx-node-pulse {
+  0%, 100% { opacity: 0.55; r: var(--r0); }
+  50%      { opacity: 1;    r: var(--r1); }
+}
+
+/* Radar / scan sweep for the schematic backdrop */
+@keyframes atx-sweep {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(220%); }
+}
+.atx-sweep {
+  animation: atx-sweep 4.5s ease-in-out infinite;
+}
+
+/* Value count-in shimmer on update */
+@keyframes atx-shimmer {
+  0% { color: var(--color-accent); }
+  100% { color: var(--color-text); }
+}
+
+/* Fade/slide-in for mounting panels */
+@keyframes atx-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.atx-rise { animation: atx-rise 0.5s ease both; }
+
+/* Animated gradient title */
+.atx-title-gradient {
+  background: linear-gradient(90deg, #eaf1fb 0%, var(--color-accent) 45%, var(--color-accent-2) 70%, #eaf1fb 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: atx-title-slide 6s linear infinite;
+}
+@keyframes atx-title-slide { to { background-position: 220% center; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .atx-spin-slow, .atx-spin-med, .atx-sweep, .atx-live-dot::after,
+  .atx-glow-critical, .atx-title-gradient, .atx-rise { animation: none !important; }
+}
